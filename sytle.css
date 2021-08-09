@@ -20,3 +20,11 @@ body {
 .vh-100 {
   height: 100vh;
 }
+
+#mainPage {
+  color: white;
+}
+
+.text-black {
+  color: black;
+}

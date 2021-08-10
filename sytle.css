@@ -28,3 +28,14 @@ body {
 .text-black {
   color: black;
 }
+
+.modal {
+  z-index: 100;
+  width: 80%;
+  height: 80%;
+  overflow-y: auto;
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  background-color: rgb(197, 197, 197);
+}

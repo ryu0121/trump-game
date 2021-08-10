@@ -1,22 +1,3 @@
-class OldMaid {
-  createTable(userName, playerType) {
-    return new OldMaidTable(userName, playerType, this);
-  }
-
-  createDeck() {
-    return new OldMaidDeck(this)
-  }
-
-  createPlayers(userName, playerType) {
-    if (playerType === 'player') return [new OldMaidPlayer('ai1', 'ai', this), new OldMaidPlayer('ai2', 'ai', this), new OldMaidPlayer('ai3', 'ai', this), new OldMaidPlayer(userName, 'player', this)];
-    else return [new OldMaidPlayer('ai1', 'ai', this), new OldMaidPlayer('ai2', 'ai', this), new OldMaidPlayer('ai3', 'ai', this), new OldMaidPlayer('ai4', 'ai', this)];
-  }
-
-  createGameDecition(player, placeToDraw) {
-    return new OldMaidDecition(player, placeToDraw);
-  }
-}
-
 class View {
   static GAMESJP = ['ババ抜き', 'ブラックジャック', 'ポーカー'];
   static GAMES = ['oldmaid', 'blackjack', 'poker'];
@@ -26,6 +7,7 @@ class View {
     gamePage: document.getElementById("gameDiv"),
     readyPage: document.getElementById("readyPage"),
     mainPage: document.getElementById("mainPage"),
+    modalPage: document.getElementById("modalPage"),
     suitImgURL: {
       "S": "./img/spade.png",
       "H": "./img/heart.png",
@@ -48,6 +30,7 @@ class View {
 
   static renderReadyPage() {
     View.config.readyPage.innerHTML = '';
+    View.displayBlock(View.config.readyPage);
     const container = document.createElement("div");
     const gameOptions = View.GAMESJP.reduce((options, game, index) => `${options}<option value="${View.GAMES[index]}">${game} </option>`, "");
     container.innerHTML =
@@ -85,13 +68,15 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static renderPlayerDivs(players) {
-    const somePlayers = [];
-    somePlayers.push(players[1]);
-    somePlayers.push(players[players.length - 1]);
+  static renderPlayerDivs(table) {
+    const players = table.players;
+    const secondAndFourthPlayers = [];
+    secondAndFourthPlayers.push(players[1]);
+    secondAndFourthPlayers.push(players[players.length - 1]);
+
     View.config.mainPage.innerHTML = '';
     View.appendPlayerDiv(players[0], players);
-    View.appendSomePlayersDiv(somePlayers);
+    View.appendSomePlayersDiv(secondAndFourthPlayers);
     View.appendPlayerDiv(players[players.length - 2], players);
   }
 
@@ -105,8 +90,9 @@ class View {
     </div>
     `
     const playerDiv = container.querySelectorAll(".playerDiv")[0];
+    // playersの最後が参加playerであるという暗黙のルールがあります
     if (players[players.length - 1].type === 'player') {
-      player.type === 'ai' ? View.renderBlindHandDiv(player.hand, playerDiv) : View.renderHandDiv(player.hand, playerDiv);
+      View.renderBlindHandDiv(player.hand, playerDiv);
     } else {
       View.renderHandDiv(player.hand, playerDiv);
     }
@@ -115,7 +101,7 @@ class View {
 
   static appendSomePlayersDiv(players) {
     const container = document.createElement("div");
-    container.classList.add('d-flex', 'justify-content-between', 'mb-4');
+    container.classList.add('d-flex', 'justify-content-around', 'mb-4');
 
     for (const player of players) {
       const playerDiv = document.createElement("div");
@@ -177,22 +163,103 @@ class View {
     handDiv.append(cardDiv);
   }
 
-  static reflectTableInfo(table) {
-    View.renderPlayerDivs(table.players);
+  static reflectPlayerHands(table) {
+    View.renderPlayerDivs(table);
   }
 
-  static showResults(resultsLog) {
-    for (const log of resultsLog) {
-      console.log(log);
+  static appendTurnPlayerMessageDiv(turnPlayer) {
+    const container = document.createElement("div");
+    container.classList.add("d-flex", "justify-content-center");
+    container.innerHTML =
+    `
+    <p class="rem3">次は${turnPlayer.name}さんのターンです</p>
+    `
+    View.config.mainPage.append(container);
+  }
+
+  static renderResultsPage(table) {
+    View.appendWinners(table.players);
+    View.appendResultsLog(table.getResultsLog());
+    View.appendRestartGameButton(table);
+  }
+
+  static appendWinners(players) {
+    const container = document.createElement("div");
+    container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
+    container.innerHTML =
+      `
+        <p class="rem3">【Winners】</p>
+      `
+    for (const player of players) {
+      if (player.gameStatus === 'won') {
+        const winnerP = document.createElement("p");
+        winnerP.innerHTML = `${player.name}さん`;
+        container.append(winnerP);
+      }
     }
+    View.config.mainPage.append(container);
+  }
+
+  static appendResultsLog(resultsLog) {
+    View.config.modalPage.innerHTML = '';
+    const modal = View.config.modalPage;
+
+    const closeButton = document.createElement("button");
+    closeButton.classList.add("btn", "btn-info");
+    closeButton.innerHTML = 'ログを閉じる';
+
+    const container = document.createElement("div");
+    container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
+    const openButton = document.createElement("button");
+    openButton.classList.add("btn", "btn-light", "mb-4");
+    openButton.innerHTML = 'ログを開く';
+    container.append(openButton);
+
+    openButton.addEventListener("click", () => {
+      for (const log of resultsLog) {
+        modal.innerHTML +=
+          `
+            <p>${log.replace(/\n/g, '<br>')}</p>
+          `
+      }
+      modal.append(closeButton);
+      View.displayBlock(modal);
+    });
+
+    closeButton.addEventListener("click", () => {
+      modal.innerHTML = ``;
+      View.displayNone(modal);
+    });
+
+    View.config.mainPage.append(container);
+  }
+
+  static appendRestartGameButton(table) {
+    const container = document.createElement("div");
+    container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
+
+    const restartGameButton = document.createElement("button");
+    restartGameButton.classList.add("btn", "btn-info");
+    restartGameButton.innerHTML = 'ゲームの選択画面に戻る';
+    container.append(restartGameButton);
+    View.config.mainPage.append(container);
+
+    restartGameButton.addEventListener("click", () => {
+      table = null;
+      View.config.mainPage.innerHTML = '';
+      View.config.modalPage.innerHTML = '';
+      View.displayNone(View.config.mainPage);
+      Controller.settingGame();
+    });
   }
 }
 
 class Controller {
   static settingGame() {
     View.renderReadyPage();
-    let startGameBtn = View.config.gamePage.querySelectorAll("#startGame")[0];
-    startGameBtn.addEventListener("click", () => {
+    const startGameButton = View.config.gamePage.querySelectorAll("#startGame")[0];
+
+    startGameButton.addEventListener("click", () => {
       const gameInfo = Controller.setGameInfo();
       if(gameInfo.playerType === 'player' && gameInfo.userName === ""){
           alert("名前を入力してください");
@@ -215,48 +282,48 @@ class Controller {
     View.displayNone(View.config.readyPage);
     View.displayBlock(View.config.mainPage);
 
-    let table = gameObject.createTable(userName, playerType);
+    const table = gameObject.createTable(userName, playerType);
+
     View.renderMessage("デッキをシャッフルしています...");
     table.shuffleDeck();
-    // await Utility.sleep(1500);
+    await Utility.sleep(1500);
 
     View.renderMessage("プレイヤーにカードを配っています...");
     table.assignPlayerHands();
-    // await Utility.sleep(1500);
-    for (const player of table.players) {
-      console.log(player.hand);
-    }
+    await Utility.sleep(1500);
 
     View.renderMessage("各プレイヤーが同じカードを捨てています...");
     table.checkPlayerHands();
-    for (const player of table.players) {
-      console.log(player.hand);
-    }
-    // await Utility.sleep(1500);
+    await Utility.sleep(1500);
 
     Controller.startGame(table);
   }
 
   static startGame(table) {
-    View.renderPlayerDivs(table.players);
+    View.renderPlayerDivs(table);
     Controller.proceedToNextTurn(table);
   }
 
   static async proceedToNextTurn(table) {
-    if (table.gamePhase === 'roundOver') return View.showResults(table.getResultsLog());
+    if (table.gamePhase === 'roundOver') {
+      return View.renderResultsPage(table);
+    }
 
     const currPlayer = table.getTurnPlayer();
     if (currPlayer.gameStatus === 'won') {
-      table.counterToFindNextPlayer++;
+      table.increaseCounterToFindNextPlayer();
       return Controller.proceedToNextTurn(table);
     };
 
+    View.appendTurnPlayerMessageDiv(currPlayer);
     await Utility.sleep(200);
+
     if (currPlayer.type === 'ai') {
       Controller.processTurn(table, null);
     } else if (currPlayer.type === 'player') {
-      const nextIndex = table.getNextPlayerIndex();
-      console.log(nextIndex);
+      // players[2]のaiからカードを引きたい場合は、3つ目のplayerDivをnextPlayerDivにする
+      // index=2, 3 のplayerがブラウザでは逆に表示されているため
+      const nextIndex = (table.getNextPlayerIndex() === 2) ? 3 : table.getNextPlayerIndex();
       const nextPlayerDiv = document.querySelectorAll(".playerDiv")[nextIndex];
       nextPlayerDiv.querySelectorAll(".card").forEach((cardDiv, index) => {
         cardDiv.addEventListener("click", () => {
@@ -270,12 +337,14 @@ class Controller {
   static async processTurn(table, userData) {
     const currPlayer = table.getTurnPlayer();
     table.haveTurn(userData);
-    View.reflectTableInfo(table);
+    View.reflectPlayerHands(table);
+    View.appendTurnPlayerMessageDiv(currPlayer);
 
     currPlayer.disposeSameNumber();
     await Utility.sleep(200);
-    View.reflectTableInfo(table);
-    table.updateInfoAfterDraw();
+    View.reflectPlayerHands(table);
+
+    table.updateAfterDraw();
 
     Controller.proceedToNextTurn(table);
   }
@@ -291,157 +360,29 @@ class Table {
     this.gamePhase;
   }
 
-  evaluateMove() {
-    throw 'No Method Error'
-  }
-
-  evaluateRoundWinners() {
-    throw 'No Method Error'
-  }
-
-  haveTurn() {
-    throw 'No Method Error'
-  }
-
   shuffleDeck() {
     this.deck.shuffle();
-  }
-}
-
-class BlackJackTable extends Table {
-  constructor(gameType) {
-    super(gameType);
-    this.betDenominations = [5, 20, 50, 100];
-    this.gamePhase = "betting";
-  }
-
-  evaluateAndGetRoundResults() {
-    return this.players.reduce((result, curr) => `${result} ${curr.name}:${curr.gameStatus}`);
-  }
-}
-
-class OldMaidTable extends Table {
-  constructor(userName, playerType, gameType) {
-    super(userName, playerType, gameType);
-    this.gamePhase = "ongoing";
-  }
-
-  evaluateMove(player, gameDecition) {
-    const nextPlayer = gameDecition.nextPlayer;
-    const place = gameDecition.placeToDraw;
-    this.passCard({ place: place, from: nextPlayer, to: player });
-  }
-
-  passCard({ place, from, to }) {
-    const card = from.popCard(place);
-    to.addCardToHand(card);
-  }
-
-  evaluateAndGetRoundResults() {
-    const turnExplanation = `${this.turnCounter}ターン目: ${this.getTurnPlayer().name}さんのターンです`;
-    const turnPlayerHand = `引いた後の手札: ${this.getTurnPlayer().showHand()}`;
-    const playerStatus = this.players.reduce((result, player) => `${result} ${player.name}:${player.gameStatus}`, '');
-    const line = "========================================";
-    return `${turnExplanation}\n${turnPlayerHand}\n${playerStatus}\n${line}`;
-  }
-
-  updateStatusOf(player) {
-    player.updateStatus();
-  }
-
-  assignPlayerHands() {
-    let index = 0;
-    while (this.deck.cards.length !== 0) {
-      this.addCardTo(this.players[index], this.deck);
-      index = (index+1) % this.players.length;
-    }
-  }
-
-  getTurnPlayer() {
-    return this.players[(this.counterToFindNextPlayer-1) % this.players.length];
-  }
-
-  getNextPlayerIndex() {
-    let nextIndex = this.counterToFindNextPlayer % this.players.length
-    let nextPlayer = this.players[nextIndex];
-    while (nextPlayer.gameStatus === 'won') {
-      nextIndex = (nextIndex+1) % this.players.length;
-      nextPlayer = this.players[nextIndex];
-    }
-    return nextIndex;
-  }
-
-  getNextPlayer() {
-    return this.players[this.getNextPlayerIndex()];
-  }
-
-  clearPlayerHands() {
-    this.players.forEach(player => {
-      player.clearHand();
-    })
-  }
-
-  haveTurn(userData = null) {
-    const currPlayer = this.getTurnPlayer();
-    const gameDecition = currPlayer.promptPlayer(userData, this);
-    this.evaluateMove(currPlayer, gameDecition);
-    this.counterToFindNextPlayer++;
-  }
-
-  updateInfoAfterDraw() {
-    const currPlayer = this.getTurnPlayer();
-    const nextPlayer = this.getNextPlayer();
-    this.updateStatusOf(nextPlayer);
-    this.updateStatusOf(currPlayer);
-    this.checkRoundOver();
-    this.resultsLog.push(this.evaluateAndGetRoundResults());
-    this.turnCounter++;
-  }
-
-  addCardTo(player, deck) {
-    player.addCardToHand(deck.drawOne());
   }
 
   getResultsLog() {
     return this.resultsLog;
   }
 
-  checkRoundOver() {
-    let counter = 0;
-    for (const player of this.players) {
-      if (player.gameStatus === 'won') counter++;
-      if (counter === this.players.length - 1) {
-        this.gamePhase = 'roundOver';
-        return;
-      }
-    }
+  evaluateMove() {
+    throw 'No Method Error'
   }
 
-  checkPlayerHands() {
-    for (const player of this.players) {
-      player.disposeSameNumber();
-    }
+  haveTurn() {
+    throw 'No Method Error'
   }
 }
 
 class Player {
-  constructor(name, type, gameType) {
-    this.name = name
-    this.type = type
-    this.gameType = gameType
+  constructor(name, type) {
+    this.name = name;
+    this.type = type;
     this.hand = [];
-  }
-
-  promptPlayer() {
-    throw 'No Method Error'
-  }
-
-  getHandScore() {
-    // ブラックジャック専用のメソッド
-    // 合計が21を超える場合、手札の各エースについて、合計が21以下になるまで10を引きます
-  }
-
-  gameTakeAction(gameType, action) {
+    this.gameStatus;
   }
 
   addCardToHand(card) {
@@ -454,99 +395,20 @@ class Player {
     return card;
   }
 
-  clearHand() {
-    this.hand = [];
-  }
-}
-
-class BlackJackPlayer extends Player {
-  constructor(name, type, gameType, chips) {
-    super(name, type, gameType);
-    this.chips = chips;
-    this.bet = 0;
-    this.winAmount = 0;
-  }
-}
-
-class OldMaidPlayer extends Player {
-  constructor(name, type, gameType) {
-    super(name, type, gameType);
-    this.gameStatus = "joining";
-  }
-
-  // ババ抜きのステータス: joining -> won
-  promptPlayer(userData, table) {
-    const nextPlayer = table.getNextPlayer();
-
-    if (this.type === 'player') {
-      console.log('プレイヤーが選択した場合のpromptPlayerを通りました');
-      return this.gameType.createGameDecition(nextPlayer, userData.placeToDraw);
-    } else if (this.type === 'ai') {
-      const placeToDraw = this.getPlaceAiDrawFrom(nextPlayer);
-      return this.gameType.createGameDecition(nextPlayer, placeToDraw);
-    }
-  }
-
-  getPlaceAiDrawFrom(player) {
-    return Utility.getRandomArbitrary(0, player.hand.length);
-  }
-
-  updateStatus() {
-    if (this.hand.length === 0) this.gameStatus = "won";
-  }
-
-  disposeSameNumber() {
-    let disposedIndexSet = new Set();
-    let resultHand = [];
-
-    for (let i = 0; i < this.hand.length; i++) {
-      if (disposedIndexSet.has(i)) continue;
-      for (let j = i + 1; j < this.hand.length; j++) {
-        if (!disposedIndexSet.has(j) && this.hand[i].rank === this.hand[j].rank) {
-          disposedIndexSet.add(i);
-          disposedIndexSet.add(j);
-          break;
-        }
-      }
-      if(!disposedIndexSet.has(i)) resultHand.push(this.hand[i]);
-    }
-    this.hand = resultHand;
-  }
-
   showHand() {
     return this.hand.reduce((handString, card) => `${handString} ${card.suit}:${card.rank}`, '');
   }
-}
 
-class GameDecision {
-}
-
-class OldMaidDecition extends GameDecision {
-  constructor(nextPlayer, placeToDraw) {
-    super();
-    this.nextPlayer = nextPlayer;
-    this.placeToDraw = placeToDraw;
-  }
-}
-
-class BlackJackDecition extends GameDecision {
-  constructor(action, amount) {
-    super();
-    this.action = action;
-    this.amount = amount;
+  promptPlayer() {
+    throw 'No Method Error';
   }
 }
 
 class Deck {
-    /*
-      String suit : {"H", "D", "C", "S"}から選択
-      String rank : {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}から選択
-    */
   static SUITS = ["H", "D", "C", "S"];
   static RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
 
-  constructor(gameType) {
-    this.gameType = gameType
+  constructor() {
     this.cards = this.createDeck();
   }
 
@@ -563,24 +425,8 @@ class Deck {
     return this.cards.pop();
   }
 
-  resetDeck() {
-    this.cards = this.createDeck();
-    this.shuffle();
-    return this.cards;
-  }
-}
-
-class OldMaidDeck extends Deck {
   createDeck() {
-    const deck = Deck.SUITS.reduce((cards, suit) => {
-      Deck.RANKS.forEach(rank => {
-        cards.push(new Card(suit, rank));
-      })
-      return cards;
-    }, [])
-    deck.push(new Card('J', 'joker'));
-
-    return deck;
+    throw new Error('No Method Error');
   }
 }
 
@@ -591,35 +437,7 @@ class Card {
   }
 
   getRankNumber() {
-    throw new Error('No Method Error')
-  }
-}
-
-class OldMaidCard extends Card {
-  getRankNumber() {
-    switch (this.rank) {
-      case 'J':
-        return 11;
-      case 'Q':
-        return 12;
-      case 'K':
-        return 13;
-      case 'A':
-        return 1;
-      default:
-        return this.rank;
-    }
-  }
-}
-
-class Utility {
-  static getRandomArbitrary(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
-
-  // 非同期関数を即時実行しているだけ
-  static sleep(time) {
-    return new Promise((resolve) => setTimeout(resolve, time));
+    throw new Error('No Method Error');
   }
 }
 

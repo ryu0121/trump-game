@@ -180,7 +180,7 @@ class View {
   static renderResultsPage(table) {
     View.appendWinners(table.players);
     View.appendResultsLog(table.getResultsLog());
-    View.appendRestartGameButton(table);
+    View.appendRestartGameButton();
   }
 
   static appendWinners(players) {
@@ -245,7 +245,6 @@ class View {
     View.config.mainPage.append(container);
 
     restartGameButton.addEventListener("click", () => {
-      table = null;
       View.config.mainPage.innerHTML = '';
       View.config.modalPage.innerHTML = '';
       View.displayNone(View.config.mainPage);

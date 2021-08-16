@@ -265,7 +265,7 @@ class Controller {
         alert("名前を入力してください");
       } else if(gameInfo.gameType !== 'oldmaid'){
         alert("このゲームのリリースはもうしばらくお待ちください");
-      }else {
+      } else {
           Controller.changePageAndReadyToStartGame(gameInfo);
       }
     });
@@ -318,7 +318,7 @@ class Controller {
     };
 
     View.appendTurnPlayerMessageDiv(currPlayer);
-    await Utility.sleep(200);
+    await Utility.sleep(700);
 
     if (currPlayer.type === 'ai') {
       Controller.processTurn(table, null);
@@ -343,7 +343,7 @@ class Controller {
     View.appendTurnPlayerMessageDiv(currPlayer);
 
     currPlayer.disposeSameNumber();
-    await Utility.sleep(200);
+    await Utility.sleep(700);
     View.reflectPlayerHands(table);
 
     table.updateAfterDraw();

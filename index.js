@@ -234,7 +234,7 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static appendRestartGameButton(table) {
+  static appendRestartGameButton() {
     const container = document.createElement("div");
     container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
 
@@ -261,9 +261,11 @@ class Controller {
 
     startGameButton.addEventListener("click", () => {
       const gameInfo = Controller.setGameInfo();
-      if(gameInfo.playerType === 'player' && gameInfo.userName === ""){
-          alert("名前を入力してください");
-      } else{
+      if (gameInfo.playerType === 'player' && gameInfo.userName === "") {
+        alert("名前を入力してください");
+      } else if(gameInfo.gameType !== 'oldmaid'){
+        alert("このゲームのリリースはもうしばらくお待ちください");
+      }else {
           Controller.changePageAndReadyToStartGame(gameInfo);
       }
     });
@@ -275,7 +277,7 @@ class Controller {
     const gameObject = View.GAMEObjects[gameType];
     const playerType = View.config.readyPage.querySelectorAll("select")[1].value;
 
-    return { userName: userName, gameObject: gameObject, playerType: playerType };
+    return { userName: userName, gameType: gameType, gameObject: gameObject, playerType: playerType };
   }
 
   static async changePageAndReadyToStartGame({ userName, gameObject, playerType }) {

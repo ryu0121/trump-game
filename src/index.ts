@@ -1,29 +1,42 @@
+type Config = {
+  gamePage: HTMLElement;
+  readyPage: HTMLElement;
+  mainPage: HTMLElement;
+  modalPage: HTMLElement;
+  suitImgURL: {
+    [key: string]: string
+  }
+}
+
+type GameObjects = {
+  [key: string]: OldMaid;
+}
+
 class View {
   static GAMESJP = ['ババ抜き', 'ブラックジャック', 'ポーカー'];
   static GAMES = ['oldmaid', 'blackjack', 'poker'];
-  static GAMEObjects = { oldmaid: new OldMaid(), blackjack: 'BlackJackComingSoon...', poker: 'PokerComingSoon...' };
+  static GAMEObjects: GameObjects = { oldmaid: new OldMaid(), blackjack: new OldMaid(), poker: new OldMaid() };
 
-  static config = {
-    gamePage: document.getElementById("gameDiv"),
-    readyPage: document.getElementById("readyPage"),
-    mainPage: document.getElementById("mainPage"),
-    modalPage: document.getElementById("modalPage"),
+  static config: Config = {
+    gamePage: document.getElementById("gameDiv")!,
+    readyPage: document.getElementById("readyPage")!,
+    mainPage: document.getElementById("mainPage")!,
+    modalPage: document.getElementById("modalPage")!,
     suitImgURL: {
       "S": "./img/spade.png",
       "H": "./img/heart.png",
       "C": "./img/clover.png",
       "D": "./img/diamond.png",
-      "?": "./img/questionMark.png",
       "J": "./img/joker.jpeg"
     }
   }
 
-  static displayNone(ele) {
+  static displayNone(ele: HTMLElement) {
     ele.classList.remove("d-block");
     ele.classList.add("d-none");
   }
 
-  static displayBlock(ele) {
+  static displayBlock(ele: HTMLElement) {
     ele.classList.remove("d-none");
     ele.classList.add("d-block");
   }
@@ -57,7 +70,7 @@ class View {
     View.config.readyPage.append(container);
   }
 
-  static renderMessage(message) {
+  static renderMessage(message: string) {
     View.config.mainPage.innerHTML = '';
     const container = document.createElement("div");
     container.classList.add("d-flex", "justify-content-center");
@@ -68,9 +81,9 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static renderPlayerDivs(table) {
+  static renderPlayerDivs(table: Table): void {
     const players = table.players;
-    const secondAndFourthPlayers = [];
+    const secondAndFourthPlayers: Player[] = [];
     secondAndFourthPlayers.push(players[1]);
     secondAndFourthPlayers.push(players[players.length - 1]);
 
@@ -80,7 +93,7 @@ class View {
     View.appendPlayerDiv(players[players.length - 2], players);
   }
 
-  static appendPlayerDiv(player, players) {
+  static appendPlayerDiv(player: Player, players: Player[]) {
     const container = document.createElement("div");
     container.classList.add('d-flex', 'justify-content-center', 'mb-4');
     container.innerHTML =
@@ -99,7 +112,7 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static appendSomePlayersDiv(players) {
+  static appendSomePlayersDiv(players: Player[]) {
     const container = document.createElement("div");
     container.classList.add('d-flex', 'justify-content-around', 'mb-4');
 
@@ -120,16 +133,16 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static renderHandDiv(hand, playerDiv) {
+  static renderHandDiv(hand: (Card | null)[], playerDiv: Element) {
     const handDiv = document.createElement("div");
     handDiv.classList.add('d-flex', 'justify-content-center');
     hand.forEach(card => {
-      View.renderCardDiv(card, handDiv);
+      if(card) View.renderCardDiv(card, handDiv);
     });
     playerDiv.append(handDiv);
   }
 
-  static renderCardDiv(card, handDiv) {
+  static renderCardDiv(card: Card, handDiv: Element) {
     const cardDiv = document.createElement("div");
     cardDiv.classList.add('bg-white', 'border', 'mx-2', 'card');
     cardDiv.innerHTML =
@@ -144,7 +157,7 @@ class View {
     handDiv.append(cardDiv);
   }
 
-  static renderBlindHandDiv(hand, playerDiv) {
+  static renderBlindHandDiv(hand: (Card | null)[], playerDiv: Element) {
     const handDiv = document.createElement("div");
     handDiv.classList.add('d-flex', 'justify-content-center');
     hand.forEach(() => {
@@ -153,7 +166,7 @@ class View {
     playerDiv.append(handDiv);
   }
 
-  static renderBlindCardDiv(handDiv) {
+  static renderBlindCardDiv(handDiv: Element) {
     const cardDiv = document.createElement("div");
     cardDiv.classList.add('bg-white', 'border', 'mx-2', 'card');
     cardDiv.innerHTML =
@@ -163,11 +176,11 @@ class View {
     handDiv.append(cardDiv);
   }
 
-  static reflectPlayerHands(table) {
+  static reflectPlayerHands(table: OldMaidTable) {
     View.renderPlayerDivs(table);
   }
 
-  static appendTurnPlayerMessageDiv(turnPlayer) {
+  static appendTurnPlayerMessageDiv(turnPlayer: OldMaidPlayer) {
     const container = document.createElement("div");
     container.classList.add("d-flex", "justify-content-center");
     container.innerHTML =
@@ -177,13 +190,13 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static renderResultsPage(table) {
+  static renderResultsPage(table: OldMaidTable) {
     View.appendWinners(table.players);
     View.appendResultsLog(table.getResultsLog());
     View.appendRestartGameButton(table);
   }
 
-  static appendWinners(players) {
+  static appendWinners(players: OldMaidPlayer[]) {
     const container = document.createElement("div");
     container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
     container.innerHTML =
@@ -200,7 +213,7 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static appendResultsLog(resultsLog) {
+  static appendResultsLog(resultsLog: string[]) {
     View.config.modalPage.innerHTML = '';
     const modal = View.config.modalPage;
 
@@ -234,7 +247,7 @@ class View {
     View.config.mainPage.append(container);
   }
 
-  static appendRestartGameButton(table) {
+  static appendRestartGameButton(table: OldMaidTable | null) {
     const container = document.createElement("div");
     container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
 
@@ -261,8 +274,10 @@ class Controller {
 
     startGameButton.addEventListener("click", () => {
       const gameInfo = Controller.setGameInfo();
-      if(gameInfo.playerType === 'player' && gameInfo.userName === ""){
-          alert("名前を入力してください");
+      if (gameInfo.playerType === 'player' && gameInfo.userName === "") {
+        alert("名前を入力してください");
+      } else if(gameInfo.gameType !== 'oldmaid') {
+        alert("そのゲームのリリースはもうしばらくお待ちください");
       } else{
           Controller.changePageAndReadyToStartGame(gameInfo);
       }
@@ -275,10 +290,10 @@ class Controller {
     const gameObject = View.GAMEObjects[gameType];
     const playerType = View.config.readyPage.querySelectorAll("select")[1].value;
 
-    return { userName: userName, gameObject: gameObject, playerType: playerType };
+    return { userName: userName, gameType: gameType, gameObject: gameObject, playerType: playerType };
   }
 
-  static async changePageAndReadyToStartGame({ userName, gameObject, playerType }) {
+  static async changePageAndReadyToStartGame({ userName, gameObject, playerType }: {userName: string, gameObject: OldMaid, playerType: string}) {
     View.displayNone(View.config.readyPage);
     View.displayBlock(View.config.mainPage);
 
@@ -299,12 +314,12 @@ class Controller {
     Controller.startGame(table);
   }
 
-  static startGame(table) {
+  static startGame(table: OldMaidTable) {
     View.renderPlayerDivs(table);
     Controller.proceedToNextTurn(table);
   }
 
-  static async proceedToNextTurn(table) {
+  static async proceedToNextTurn(table: OldMaidTable): Promise<any> {
     if (table.gamePhase === 'roundOver') {
       return View.renderResultsPage(table);
     }
@@ -334,7 +349,7 @@ class Controller {
     }
   }
 
-  static async processTurn(table, userData) {
+  static async processTurn(table: OldMaidTable, userData: userDatable | null) {
     const currPlayer = table.getTurnPlayer();
     table.haveTurn(userData);
     View.reflectPlayerHands(table);
@@ -350,14 +365,27 @@ class Controller {
   }
 }
 
-class Table {
-  constructor(userName, playerType, gameType) {
+interface Game {
+  createTable(userName: string, playerType: string): Table;
+  createDeck(): Deck;
+  createPlayers(userName: string, playerType: string): Player[];
+}
+
+abstract class Table {
+  public deck: Deck;
+  public players: Player[];
+  protected resultsLog: string[];
+  protected counterToFindNextPlayer: number;
+  protected turnCounter: number;
+  public gamePhase: string;
+
+  constructor(userName: string, playerType: string, gameType: Game) {
     this.deck = gameType.createDeck();
     this.players = gameType.createPlayers(userName, playerType);
     this.resultsLog = [];
     this.counterToFindNextPlayer = 1;
     this.turnCounter = 1;
-    this.gamePhase;
+    this.gamePhase = '';
   }
 
   shuffleDeck() {
@@ -368,45 +396,40 @@ class Table {
     return this.resultsLog;
   }
 
-  evaluateMove() {
-    throw 'No Method Error'
-  }
+  abstract evaluateMove(player: Player, gameDecision: any): void;
 
-  haveTurn() {
-    throw 'No Method Error'
-  }
+  abstract haveTurn(userData: userDatable | null): void;
 }
 
-class Player {
-  constructor(name, type) {
-    this.name = name;
-    this.type = type;
+abstract class Player {
+  public hand: (Card | null)[];
+  public gameStatus: string;
+
+  constructor(public name: string, public type: string) {
     this.hand = [];
-    this.gameStatus;
+    this.gameStatus = '';
   }
 
-  addCardToHand(card) {
+  addCardToHand(card: Card) {
     this.hand.push(card);
   }
 
-  popCard(place) {
+  popCard(place: number) {
     const card = this.hand[place];
     this.hand.splice(place, 1);
     return card;
   }
 
-  showHand() {
-    return this.hand.reduce((handString, card) => `${handString} ${card.suit}:${card.rank}`, '');
-  }
-
-  promptPlayer() {
-    throw 'No Method Error';
+  showHand(): string {
+    return this.hand.reduce((handString, card) => `${handString} ${card!.suit}:${card!.rank}`, '');
   }
 }
 
-class Deck {
+abstract class Deck {
   static SUITS = ["H", "D", "C", "S"];
   static RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+  public cards: Card[];
 
   constructor() {
     this.cards = this.createDeck();
@@ -421,23 +444,20 @@ class Deck {
     })
   }
 
-  drawOne() {
-    return this.cards.pop();
+  drawOne(): Card {
+    return this.cards.pop()!;
   }
 
-  createDeck() {
-    throw new Error('No Method Error');
-  }
+  abstract createDeck(): Card[];
 }
 
 class Card {
-  constructor(suit, rank) {
+  public suit: string;
+  public rank: string;
+
+  constructor(suit: string, rank: string) {
     this.suit = suit;
     this.rank = rank;
-  }
-
-  getRankNumber() {
-    throw new Error('No Method Error');
   }
 }
 

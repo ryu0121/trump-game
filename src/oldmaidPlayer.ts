@@ -1,22 +1,26 @@
+type userDatable = {
+  placeToDraw: number;
+}
+
 class OldMaidPlayer extends Player {
-  constructor(name, type) {
+  constructor(public name: string, public type: string) {
     super(name, type);
     // ババ抜きのステータス: joining -> won
     this.gameStatus = "joining";
   }
 
-  promptPlayer(userData, table) {
+  promptPlayer(userData: userDatable | null , table: OldMaidTable) {
     const nextPlayer = table.getNextPlayer();
 
     if (this.type === 'player') {
-      return new OldMaidDecision(nextPlayer, userData.placeToDraw);
-    } else if (this.type === 'ai') {
+      return new OldMaidDecision(nextPlayer, userData!.placeToDraw);
+    } else {
       const placeToDraw = this.getPlaceAiDrawFrom(nextPlayer);
       return new OldMaidDecision(nextPlayer, placeToDraw);
     }
   }
 
-  getPlaceAiDrawFrom(player) {
+  getPlaceAiDrawFrom(player: Player): number {
     return Utility.getRandomArbitrary(0, player.hand.length);
   }
 
@@ -29,7 +33,7 @@ class OldMaidPlayer extends Player {
     for (let i = 0; i < this.hand.length; i++) {
       if (!this.hand[i]) continue;
       for (let j = i + 1; j < this.hand.length; j++) {
-        if (this.hand[j] && this.hand[i].rank === this.hand[j].rank) {
+        if (this.hand[j] && this.hand[i]!.rank === this.hand[j]!.rank) {
           this.hand[i] = null;
           this.hand[j] = null;
           break;

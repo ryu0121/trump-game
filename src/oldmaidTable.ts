@@ -1,12 +1,16 @@
 class OldMaidTable extends Table {
-  constructor(userName, playerType, gameType) {
+  public players: OldMaidPlayer[];
+
+  constructor(userName: string, playerType: string, gameType: OldMaid) {
     super(userName, playerType, gameType);
+    this.deck = gameType.createDeck();
+    this.players = gameType.createPlayers(userName, playerType);
     this.gamePhase = "ongoing";
   }
 
-  passCard({ place, from, to }) {
+  passCard({ place, from, to }: {place: number, from: OldMaidPlayer, to: OldMaidPlayer}) {
     const card = from.popCard(place);
-    to.addCardToHand(card);
+    to.addCardToHand(card!);
   }
 
   evaluateAndGetRoundResults() {
@@ -17,7 +21,7 @@ class OldMaidTable extends Table {
     return `${turnExplanation}\n${turnPlayerHand}\n${playerStatus}\n${line}`;
   }
 
-  updateStatusOf(player) {
+  updateStatusOf(player: OldMaidPlayer) {
     player.updateStatus();
   }
 
@@ -51,12 +55,6 @@ class OldMaidTable extends Table {
     this.counterToFindNextPlayer++;
   }
 
-  clearPlayerHands() {
-    this.players.forEach(player => {
-      player.clearHand();
-    })
-  }
-
   updateAfterDraw() {
     const currPlayer = this.getTurnPlayer();
     const nextPlayer = this.getNextPlayer();
@@ -68,7 +66,7 @@ class OldMaidTable extends Table {
     this.counterToFindNextPlayer++;
   }
 
-  addCardTo(player, deck) {
+  addCardTo(player: OldMaidPlayer, deck: OldMaidDeck) {
     player.addCardToHand(deck.drawOne());
   }
 
@@ -89,13 +87,13 @@ class OldMaidTable extends Table {
     }
   }
 
-  evaluateMove(player, gameDecision) {
+  evaluateMove(player: OldMaidPlayer, gameDecision: OldMaidDecision) {
     const nextPlayer = gameDecision.nextPlayer;
     const place = gameDecision.placeToDraw;
     this.passCard({ place: place, from: nextPlayer, to: player });
   }
 
-  haveTurn(userData = null) {
+  haveTurn(userData: userDatable | null) {
     const currPlayer = this.getTurnPlayer();
     const gameDecision = currPlayer.promptPlayer(userData, this);
     this.evaluateMove(currPlayer, gameDecision);

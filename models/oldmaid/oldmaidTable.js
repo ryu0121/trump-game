@@ -4,6 +4,20 @@ class OldMaidTable extends Table {
     this.gamePhase = "ongoing";
   }
 
+  prepareMessages() {
+    return [
+      "デッキをシャッフルしています...",
+      "プレイヤーにカードを配っています...",
+      "各プレイヤーが同じカードを捨てています..."
+    ];
+  }
+
+  concrete_prepare() {
+    this.shuffleDeck();
+    this.assignPlayerHands();
+    this.checkPlayerHands();
+  }
+
   passCard({ place, from, to }) {
     const card = from.popCard(place);
     to.addCardToHand(card);

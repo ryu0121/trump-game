@@ -1,4 +1,4 @@
-class Utility {
+class Utils {
   static getRandomArbitrary(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
   }

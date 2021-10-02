@@ -17,7 +17,7 @@ class OldMaidPlayer extends Player {
   }
 
   getPlaceAiDrawFrom(player) {
-    return Utility.getRandomArbitrary(0, player.hand.length);
+    return Utils.getRandomArbitrary(0, player.hand.length);
   }
 
   updateStatus() {

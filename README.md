@@ -4,7 +4,7 @@ This is trump game made by JavaScript.
 The game you can play is only oldmaid right now.
 It'll be updated soon...
 # Gif
-https://user-images.githubusercontent.com/56571304/135740942-4ab9acf1-c58e-40c2-9d69-da96c11ef4c7.gif
+![trump-game](https://user-images.githubusercontent.com/56571304/135740942-4ab9acf1-c58e-40c2-9d69-da96c11ef4c7.gif)
 # URL
 https://ryu0121.github.io/trump-game/
 # Installation

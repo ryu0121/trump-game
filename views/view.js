@@ -1,7 +1,7 @@
 class View {
-  static GAMESJP = ['ババ抜き', 'ブラックジャック', 'ポーカー'];
+  static GAMESJP = ['ババ抜き'];
   static GAMES = ['oldmaid', 'blackjack', 'poker'];
-  static GAMEObjects = { oldmaid: new OldMaid(), blackjack: 'BlackJackComingSoon...', poker: 'PokerComingSoon...' };
+  static GAMEObjects = { oldmaid: new OldMaid() };
 
   static config = {
     gamePage: document.getElementById("gameDiv"),
@@ -14,7 +14,7 @@ class View {
       "C": "./img/clover.png",
       "D": "./img/diamond.png",
       "?": "./img/questionMark.png",
-      "J": "./img/joker.jpeg"
+      "J": "./img/joker.png"
     }
   }
 
@@ -35,23 +35,23 @@ class View {
     const gameOptions = View.GAMESJP.reduce((options, game, index) => `${options}<option value="${View.GAMES[index]}">${game} </option>`, "");
     container.innerHTML =
     `
-    <p class="text-white">遊びたいカードゲームを選択してください</p>
-    <div class="my-2">
-        <input type="text" placeholder="ユーザー名" value="">
+    <p>遊びたいカードゲームを選択してください</p>
+    <div class="my-3 w-100">
+        <input class="w-100 neumophism-box basic-color p-1" type="text" placeholder="ユーザー名" value="">
     </div>
-    <div class="my-2">
-        <select class="w-100">
+    <div class="my-3 w-100">
+        <select class="w-100 neumophism-box basic-color p-1">
           ${gameOptions}
         </select>
     </div>
-    <div class="my-2">
-        <select class="w-100">
+    <div class="my-3">
+        <select class="w-100 neumophism-box basic-color p-1">
             <option value="ai">AI戦 </option>
             <option value="player">プレイヤーとして参加 </option>
         </select>
     </div>
-    <div class="my-2">
-        <button type="submit" class="btn btn-success" id="startGame">ゲームを始める</button>
+    <div class="my-3">
+        <button type="submit" class="btn neumophism" id="startGame">ゲームを始める</button>
     <div>
     `
     View.config.readyPage.append(container);
@@ -93,7 +93,7 @@ class View {
     container.innerHTML =
     `
     <div class="flex-column playerDiv">
-      <p class="m-0 text-white text-center rem3">${player.name}</p>
+      <p class="m-0 text-center rem3">${player.name}</p>
     </div>
     `
     const playerDiv = container.querySelectorAll(".playerDiv")[0];
@@ -115,7 +115,7 @@ class View {
       playerDiv.classList.add('flex-column', 'playerDiv');
       playerDiv.innerHTML =
       `
-      <p class="m-0 text-white text-center rem3">${player.name}</p>
+      <p class="m-0 text-center rem3">${player.name}</p>
       `
       if (players[players.length - 1].type === 'player') {
         player.type === 'ai' ? View.renderBlindHandDiv(player.hand, playerDiv) : View.renderHandDiv(player.hand, playerDiv);
@@ -138,7 +138,7 @@ class View {
 
   static renderCardDiv(card, handDiv) {
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add('bg-white', 'border', 'mx-2', 'card');
+    cardDiv.classList.add('mx-2', 'card', 'neumophism-card' , 'basic-color');
     cardDiv.innerHTML =
     `
     <div class="text-center">
@@ -162,7 +162,7 @@ class View {
 
   static renderBlindCardDiv(handDiv) {
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add('bg-white', 'border', 'mx-2', 'card');
+    cardDiv.classList.add('mx-2', 'card', 'neumophism-card', 'basic-color');
     cardDiv.innerHTML =
     `
     <img src="./img/trump-back.jpeg" , " alt="" width="50" height="80">
@@ -212,13 +212,13 @@ class View {
     const modal = View.config.modalPage;
 
     const closeButton = document.createElement("button");
-    closeButton.classList.add("btn", "btn-info");
+    closeButton.classList.add("btn", "neumophism-close-button");
     closeButton.innerHTML = 'ログを閉じる';
 
     const container = document.createElement("div");
     container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
     const openButton = document.createElement("button");
-    openButton.classList.add("btn", "btn-light", "mb-4");
+    openButton.classList.add("btn", "mb-4", "neumophism-open-button");
     openButton.innerHTML = 'ログを開く';
     container.append(openButton);
 
@@ -246,7 +246,7 @@ class View {
     container.classList.add("d-flex", "flex-column", "justify-content-center", "align-items-center");
 
     const restartGameButton = document.createElement("button");
-    restartGameButton.classList.add("btn", "btn-info");
+    restartGameButton.classList.add("btn", "neumophism-open-button");
     restartGameButton.innerHTML = 'ゲームの選択画面に戻る';
     container.append(restartGameButton);
     View.config.mainPage.append(container);

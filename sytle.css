@@ -1,16 +1,44 @@
 body {
   margin: 0;
-  font-family: Verdana !important;
+  font-family: "Sawarabi Mincho", sans-serif;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
   color: #212529;
   text-align: left;
-  background-color: #fff;
+  background-color: rgb(230, 227, 227);
 }
 
-.bg-green {
-  background-color: #1d4434;
+.neumophism {
+  border-radius: 50px;
+  background: linear-gradient(145deg, #f0f0f0, rgb(230, 227, 227));
+  box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;
+  border: none;
+}
+.neumophism-box {
+  border-radius: 5px;
+  background: rgb(230, 227, 227);
+  box-shadow: inset 3px 3px 6px #bdbdbd, inset -3px -3px 6px #ffffff;
+  border: none;
+}
+.neumophism-card {
+  border-radius: 5px;
+  background: linear-gradient(145deg, #f0f0f0, rgb(230, 227, 227));
+  box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;
+  border: none;
+}
+
+.neumophism-open-button {
+  border-radius: 5px;
+  background: linear-gradient(145deg, rgb(177, 196, 221), rgba(112, 165, 235));
+  box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;
+  border: none;
+}
+.neumophism-close-button {
+  border-radius: 5px;
+  background: linear-gradient(145deg, rgb(218, 175, 173), rgb(235, 116, 112));
+  box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;
+  border: none;
 }
 
 .rem3 {
@@ -19,10 +47,6 @@ body {
 
 .vh-100 {
   height: 100vh;
-}
-
-#mainPage {
-  color: white;
 }
 
 .text-black {
@@ -37,5 +61,4 @@ body {
   position: absolute;
   top: 10%;
   left: 10%;
-  background-color: rgb(197, 197, 197);
 }
